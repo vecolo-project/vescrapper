@@ -7,6 +7,8 @@ from ply4ever.genereTreeGraphviz import printTreeGraph
 
 reserved = {
     'GET': 'GET',
+    'OF': 'OF',
+    'WITH': 'WITH',
     'FROM': 'FROM'
 }
 
@@ -27,8 +29,8 @@ t_TIMES = r'\*'
 t_DIVIDE = r'/'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
-t_AND = r'&'
-t_OR = r'\|'
+t_AND = r'AND'
+t_OR = r'OR'
 t_SEMI = r';'
 t_COMA = r','
 t_EQUALS = r'='
@@ -42,7 +44,7 @@ def t_ENTITY(t):
 
 
 def t_NAME(t):
-    r"""[a-zA-Z_][a-zA-Z0-9_]*"""
+    r"""\*|[a-zA-Z_][a-zA-Z0-9_]*"""
     t.type = reserved.get(t.value, "NAME")
     return t
 
@@ -88,6 +90,11 @@ def p_start(p):
     # evalInst(p[1])
 
 
+def p_statement(p):
+    """statement : GET ENTITIES OF NAMES FROM NAMES WITH CONDITION SEMI"""
+    p[0] = ('GET', ('ENTITIES', p[2]), ('OF', p[4]), ('FROM', p[6]), ('CONDITION', p[8]))
+
+
 def p_expression_number(p):
     """expression : NUMBER"""
     p[0] = p[1]
@@ -102,33 +109,34 @@ def p_entities(p):
         p[0] = ('entity', p[1], p[3])
 
 
+def p_names(p):
+    """NAMES : NAME
+    | NAMES COMA NAME"""
+    if len(p) == 2:
+        p[0] = ('names', 'empty', p[1])
+    else:
+        p[0] = ('names', p[1], p[3])
 
-def p_statement(p):
-    """statement : GET ENTITIES"""
-    p[0] = ('GET', p[2], 'empty')
+
+def p_condition(p):
+    """CONDITION : NAME"""
+    p[0] = p[1]
 
 
-# def p_expression_binop(p):
-#     """expression : expression PLUS expression
-#                 | expression TIMES expression
-#                 | expression MINUS expression
-#                 | expression DIVIDE expression
-#                 | expression AND expression
-#                 | expression OR expression
-#                 | expression GREATER expression
-#                 | expression LOWER expression
-#                 | expression EQUALS expression"""
-#     p[0] = (p[2], p[1], p[3])
-#
-#
 def p_expr_uminus(p):
     """expression : MINUS expression %prec UMINUS"""
     p[0] = -p[2]
 
 
 def p_expression_group(p):
-    """expression : LPAREN expression RPAREN"""
+    """CONDITION : LPAREN CONDITION RPAREN"""
     p[0] = p[2]
+
+
+def p_condition_binop(p):
+    """CONDITION : CONDITION OR CONDITION
+    | CONDITION AND CONDITION"""
+    p[0] = (p[2], p[1], p[3])
 
 
 def p_error(p):

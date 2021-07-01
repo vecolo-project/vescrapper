@@ -1,1 +1,1 @@
-GET image, text
+GET image, text OF velo FROM * WITH blue ;
