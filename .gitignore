@@ -1,0 +1,12 @@
+
+.idea/
+
+venv/
+
+parser.out
+
+parsetab.py
+
+Digraph.gv
+
+Digraph.gv.pdf
