@@ -6,7 +6,8 @@ from ply4ever.parse import evalInst
 from ply4ever.genereTreeGraphviz import printTreeGraph
 
 reserved = {
-    'GET': 'GET'
+    'GET': 'GET',
+    'FROM': 'FROM'
 }
 
 tokens = [
@@ -52,11 +53,6 @@ def t_NUMBER(t):
     return t
 
 
-def p_expression_number(p):
-    """expression : NUMBER"""
-    p[0] = p[1]
-
-
 # Ignored characters
 t_ignore = " \t\n\r"
 
@@ -86,19 +82,25 @@ precedence = (
 
 def p_start(p):
     """start : statement"""
-    # p[0] = p[1]
+    p[0] = p[1]
     print(p[0])
     printTreeGraph(p[0])
     # evalInst(p[1])
+
+
+def p_expression_number(p):
+    """expression : NUMBER"""
+    p[0] = p[1]
 
 
 def p_entities(p):
     """ENTITIES : ENTITY
     | ENTITIES COMA ENTITY"""
     if len(p) == 2:
-        p[0] = ('entity', p[1], 'empty')
+        p[0] = ('entity', 'empty', p[1])
     else:
         p[0] = ('entity', p[1], p[3])
+
 
 
 def p_statement(p):
@@ -124,21 +126,13 @@ def p_expr_uminus(p):
     p[0] = -p[2]
 
 
-#
-# def p_expression_group(p):
-#     """expression : LPAREN expression RPAREN"""
-#     p[0] = p[2]
-#
-#
+def p_expression_group(p):
+    """expression : LPAREN expression RPAREN"""
+    p[0] = p[2]
 
 
 def p_error(p):
     print("Syntax error at '%s'" % p.value)
-
-
-# import ply.yacc as yacc
-#
-# yacc.yacc()
 
 
 def load_files(yacc):
