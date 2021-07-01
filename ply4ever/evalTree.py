@@ -11,6 +11,7 @@ reserved = {
     'WITH': 'WITH',
     'FROM': 'FROM',
     'OR': 'OR',
+    'LIMIT': 'LIMIT',
     'AND': 'AND'
 }
 
@@ -90,8 +91,18 @@ def p_start(p):
 
 
 def p_statement(p):
-    """statement : GET ENTITIES OF NAMES FROM NAMES WITH CONDITIONS SEMI"""
-    p[0] = ('GET', ('ENTITIES', p[2]), ('OF', p[4]), ('FROM', p[6]), ('CONDITIONS', p[8]))
+    """statement : GET ENTITIES OF NAMES FROM NAMES WITH CONDITIONS LIMIT NUMBER SEMI
+    | GET ENTITIES OF NAMES FROM NAMES WITH CONDITIONS SEMI
+    | GET ENTITIES OF NAMES FROM NAMES LIMIT NUMBER SEMI
+    | GET ENTITIES OF NAMES FROM NAMES SEMI"""
+    if len(p) == 12:
+        p[0] = ('GET', ('ENTITIES', p[2]), ('OF', p[4]), ('FROM', p[6]), ('CONDITIONS', p[8]), ('LIMIT', p[10]))
+    elif len(p) == 10:
+        p[0] = ('GET', ('ENTITIES', p[2]), ('OF', p[4]), ('FROM', p[6]),
+                ('LIMIT' if type(p[8]) is int else 'CONDITIONS', p[8]))
+    else:
+        p[0] = ('GET', ('ENTITIES', p[2]), ('OF', p[4]), ('FROM', p[6]))
+
 
 def p_entities(p):
     """ENTITIES : ENTITY
@@ -129,7 +140,6 @@ def p_condition_binop(p):
         p[0] = (p[2], p[1], p[3])
     else:
         p[0] = p[1]
-
 
 
 def p_error(p):
