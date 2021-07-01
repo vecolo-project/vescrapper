@@ -9,7 +9,9 @@ reserved = {
     'GET': 'GET',
     'OF': 'OF',
     'WITH': 'WITH',
-    'FROM': 'FROM'
+    'FROM': 'FROM',
+    'OR': 'OR',
+    'AND': 'AND'
 }
 
 tokens = [
@@ -17,20 +19,18 @@ tokens = [
              'NUMBER', 'MINUS', 'CHARS',
              'PLUS', 'TIMES', 'DIVIDE',
              'LPAREN', 'RPAREN',
-             'AND', 'OR', "EQUALS", "NAME", "SEMI", "COMA",
+             "EQUALS", "NAME", "SEMI", "COMA",
              "GREATER", "LOWER"
          ] + list(reserved.values())
 
 # Tokens
-t_CHARS = r'".+"'
+t_CHARS = r'"((?!").)*"'
 t_PLUS = r'\+'
 t_MINUS = r'-'
 t_TIMES = r'\*'
 t_DIVIDE = r'/'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
-t_AND = r'AND'
-t_OR = r'OR'
 t_SEMI = r';'
 t_COMA = r','
 t_EQUALS = r'='
@@ -75,10 +75,9 @@ lex.lex()
 
 precedence = (
     ('nonassoc', 'EQUALS', 'LOWER', 'GREATER'),
-    ('nonassoc', 'AND', 'OR'),
+    ('left', 'AND', 'OR'),
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE'),
-    ('right', 'UMINUS'),
 )
 
 
@@ -91,14 +90,8 @@ def p_start(p):
 
 
 def p_statement(p):
-    """statement : GET ENTITIES OF NAMES FROM NAMES WITH CONDITION SEMI"""
-    p[0] = ('GET', ('ENTITIES', p[2]), ('OF', p[4]), ('FROM', p[6]), ('CONDITION', p[8]))
-
-
-def p_expression_number(p):
-    """expression : NUMBER"""
-    p[0] = p[1]
-
+    """statement : GET ENTITIES OF NAMES FROM NAMES WITH CONDITIONS SEMI"""
+    p[0] = ('GET', ('ENTITIES', p[2]), ('OF', p[4]), ('FROM', p[6]), ('CONDITIONS', p[8]))
 
 def p_entities(p):
     """ENTITIES : ENTITY
@@ -119,24 +112,24 @@ def p_names(p):
 
 
 def p_condition(p):
-    """CONDITION : NAME"""
-    p[0] = p[1]
+    """CONDITION : CHARS"""
+    p[0] = p[1].strip('"')
 
 
-def p_expr_uminus(p):
-    """expression : MINUS expression %prec UMINUS"""
-    p[0] = -p[2]
-
-
-def p_expression_group(p):
-    """CONDITION : LPAREN CONDITION RPAREN"""
+def p_condition_group(p):
+    """CONDITIONS : LPAREN CONDITIONS RPAREN"""
     p[0] = p[2]
 
 
 def p_condition_binop(p):
-    """CONDITION : CONDITION OR CONDITION
-    | CONDITION AND CONDITION"""
-    p[0] = (p[2], p[1], p[3])
+    """CONDITIONS : CONDITION
+    | CONDITIONS OR CONDITIONS
+    | CONDITIONS AND CONDITIONS"""
+    if len(p) == 4:
+        p[0] = (p[2], p[1], p[3])
+    else:
+        p[0] = p[1]
+
 
 
 def p_error(p):
