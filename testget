@@ -1,1 +1,0 @@
-GET image, text OF velo FROM * WITH "blue" OR "cyan" AND "green" OR "youpi";

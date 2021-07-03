@@ -1,2 +1,3 @@
-graphviz==0.16
 ply==3.11
+graphviz==0.16
+google==3.0.0

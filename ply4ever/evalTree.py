@@ -5,6 +5,7 @@ import ply.lex as lex
 from ply4ever.parse import evalScrap
 from ply4ever.genereTreeGraphviz import printTreeGraph
 
+showTree = False
 reserved = {
     'GET': 'GET',
     'OF': 'OF',
@@ -36,7 +37,7 @@ def t_ENTITY(t):
 
 
 def t_NAME(t):
-    r"""\*|[a-zA-Z_][a-zA-Z0-9_]*"""
+    r"""\*|[a-zA-Z_][a-zA-Z0-9_-]*"""
     t.type = reserved.get(t.value, "NAME")
     return t
 
@@ -73,9 +74,10 @@ precedence = (
 def p_start(p):
     """start : statement"""
     p[0] = p[1]
-    print(p[0])
-    # printTreeGraph(p[0])
-    evalInst(p[0])
+    if showTree:
+        print(p[0])
+        printTreeGraph(p[0])
+    evalScrap(p[0])
 
 
 def p_statement(p):
@@ -149,13 +151,22 @@ def load_files(yacc):
     if len(sys.argv) >= 2:
         for i in range(1, len(sys.argv)):
             with open(sys.argv[i], 'r') as file:
-                yacc.parse(file.read())
+                content = file.read()
+                print("Vescrapper reading :", content)
+                yacc.parse(content)
 
 
 def cli(yacc):
+    global showTree
     while True:
-        s = input('cmd (type exit(); to leave) > ')
+        s = input('cmd > ')
         if s == "exit();":
             print("Bye bye !")
             return
+        if s == "debugOn();":
+            showTree = True
+            print("Debug ON !")
+        if s == "debugOff();":
+            showTree = False
+            print("Debug OFF !")
         yacc.parse(s)
