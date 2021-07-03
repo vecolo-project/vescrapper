@@ -17,26 +17,17 @@ reserved = {
 
 tokens = [
              'ENTITY',
-             'NUMBER', 'MINUS', 'CHARS',
-             'PLUS', 'TIMES', 'DIVIDE',
+             'NUMBER', 'CHARS',
              'LPAREN', 'RPAREN',
-             "EQUALS", "NAME", "SEMI", "COMA",
-             "GREATER", "LOWER"
+             "NAME", "SEMI", "COMA"
          ] + list(reserved.values())
 
 # Tokens
 t_CHARS = r'"((?!").)*"'
-t_PLUS = r'\+'
-t_MINUS = r'-'
-t_TIMES = r'\*'
-t_DIVIDE = r'/'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_SEMI = r';'
 t_COMA = r','
-t_EQUALS = r'='
-t_GREATER = r'>'
-t_LOWER = r'<'
 
 
 def t_ENTITY(t):
@@ -75,10 +66,7 @@ def t_error(t):
 lex.lex()
 
 precedence = (
-    ('nonassoc', 'EQUALS', 'LOWER', 'GREATER'),
     ('left', 'AND', 'OR'),
-    ('left', 'PLUS', 'MINUS'),
-    ('left', 'TIMES', 'DIVIDE'),
 )
 
 
@@ -86,8 +74,8 @@ def p_start(p):
     """start : statement"""
     p[0] = p[1]
     print(p[0])
-    printTreeGraph(p[0])
-    # evalInst(p[1])
+    # printTreeGraph(p[0])
+    evalInst(p[0])
 
 
 def p_statement(p):
@@ -117,9 +105,9 @@ def p_names(p):
     """NAMES : NAME
     | NAMES COMA NAME"""
     if len(p) == 2:
-        p[0] = ('names', 'empty', p[1])
+        p[0] = ('name', 'empty', p[1])
     else:
-        p[0] = ('names', p[1], p[3])
+        p[0] = ('name', p[1], p[3])
 
 
 def p_condition(p):
