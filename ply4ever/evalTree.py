@@ -2,7 +2,7 @@ import sys
 
 import ply.lex as lex
 
-from ply4ever.parse import evalInst
+from ply4ever.parse import evalScrap
 from ply4ever.genereTreeGraphviz import printTreeGraph
 
 reserved = {
@@ -84,12 +84,23 @@ def p_statement(p):
     | GET ENTITIES OF NAMES FROM NAME LIMIT NUMBER SEMI
     | GET ENTITIES OF NAMES FROM NAME SEMI"""
     if len(p) == 12:
-        p[0] = ('GET', ('ENTITIES', p[2]), ('OF', p[4]), ('FROM', p[6]), ('CONDITIONS', p[8]), ('LIMIT', p[10]))
+        p[0] = ('GET',
+                ('ENTITIES', p[2]),
+                ('OF', p[4]),
+                ('FROM', p[6]),
+                ('CONDITIONS', p[8]),
+                ('LIMIT', p[10]))
     elif len(p) == 10:
-        p[0] = ('GET', ('ENTITIES', p[2]), ('OF', p[4]), ('FROM', p[6]),
+        p[0] = ('GET',
+                ('ENTITIES', p[2]),
+                ('OF', p[4]),
+                ('FROM', p[6]),
                 ('LIMIT' if type(p[8]) is int else 'CONDITIONS', p[8]))
     else:
-        p[0] = ('GET', ('ENTITIES', p[2]), ('OF', p[4]), ('FROM', p[6]))
+        p[0] = ('GET',
+                ('ENTITIES', p[2]),
+                ('OF', p[4]),
+                ('FROM', p[6]))
 
 
 def p_entities(p):
