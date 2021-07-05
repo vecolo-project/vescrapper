@@ -166,7 +166,9 @@ def cli(yacc):
         if s == "debugOn();":
             showTree = True
             print("Debug ON !")
+            continue
         if s == "debugOff();":
             showTree = False
             print("Debug OFF !")
+            continue
         yacc.parse(s)
